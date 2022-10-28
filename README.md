@@ -1,3 +1,5 @@
+*This is a copy of [cordova-sqlcipher-adapter](https://github.com/brodybits/cordova-sqlcipher-adapter) with android support removed.*
+
 # Cordova/PhoneGap SQLCipher adapter plugin
 
 Native interface to sqlcipher in a Cordova/PhoneGap plugin for Android, iOS, macOS, ~~and _Windows_,~~ with API similar to HTML5/[Web SQL API](http://www.w3.org/TR/webdatabase/).

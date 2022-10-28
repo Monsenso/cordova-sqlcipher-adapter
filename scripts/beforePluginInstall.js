@@ -9,24 +9,23 @@ var exec = require('child_process').exec;
 // XXX FUTURE TBD auto-detect:
 var package_name = 'cordova-sqlite-legacy-core';
 
-module.exports = function (context) {
-    var Q = context.requireCordovaModule('q');
-    var deferral = new Q.defer();
+module.exports = function(context) {
+    return new Promise(function(resolve) {
+        console.log('installing external dependencies via npm');
 
-    console.log('installing external dependencies via npm');
-
-    exec(   'npm install', {cwd: path.join('plugins', package_name)},
-            function (error, stdout, stderr) {
-                if (error !== null) {
-                    // XXX TODO SIGNAL FAILURE HERE.
-                    console.log('npm install of external dependencies failed: ' + error);
-                    deferral.resolve();
-                } else {
-                    console.log('npm install of external dependencies ok');
-                    deferral.resolve();
-                }
+        exec('npm install', { cwd: path.join('plugins', package_name) }, function(
+            error,
+            stdout,
+            stderr,
+        ) {
+            if (error !== null) {
+                // XXX TODO SIGNAL FAILURE HERE.
+                console.log('npm install of external dependencies failed: ' + error);
+                resolve();
+            } else {
+                console.log('npm install of external dependencies ok');
+                resolve();
             }
-    );
-
-    return deferral.promise;
+        });
+    });
 };
