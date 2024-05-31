@@ -53,6 +53,9 @@
                                      -DSQLITE_DEFAULT_PAGE_SIZE=1024 -DSQLITE_DEFAULT_CACHE_SIZE=2000" />
 
         <framework src="Security.framework" />
+
+        <resource-file src="src/ios/SQLitePlugin.bundle"
+                       target="SQLitePlugin.bundle" />
     </platform>
 
     <!-- macOS (osx) -->
