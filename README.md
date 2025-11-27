@@ -1,4 +1,4 @@
-*This is a copy of [cordova-sqlcipher-adapter](https://github.com/brodybits/cordova-sqlcipher-adapter) with android support removed.*
+*This is a copy of [cordova-sqlcipher-adapter](https://github.com/brodybits/cordova-sqlcipher-adapter).*
 
 # Cordova/PhoneGap SQLCipher adapter plugin
 

@@ -9,6 +9,7 @@
   "cordova": {
     "id": "cordova-sqlcipher-adapter",
     "platforms": [
+      "android",
       "ios",
       "osx",
       "windows"
