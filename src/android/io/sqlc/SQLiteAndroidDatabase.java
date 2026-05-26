@@ -6,11 +6,12 @@
 
 package io.sqlc;
 
-import android.annotation.SuppressLint;
-
 // SQLCipher version of database classes:
 import net.sqlcipher.*;
 import net.sqlcipher.database.*;
+// zetetic 4.x does not include these in net.sqlcipher.database, use Android standard:
+import android.database.sqlite.SQLiteConstraintException;
+import android.database.sqlite.SQLiteException;
 /* **
 import android.database.Cursor;
 import android.database.CursorWindow;
@@ -26,8 +27,9 @@ import android.util.Log;
 
 import java.io.File;
 
-import java.lang.IllegalArgumentException;
 import java.lang.Number;
+
+import java.util.Locale;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,10 +59,6 @@ class SQLiteAndroidDatabase
     private static final Pattern DELETE_TABLE_NAME = Pattern.compile("^\\s*DELETE\\s+FROM\\s+(\\S+)",
             Pattern.CASE_INSENSITIVE);
 
-    private static final boolean isPostHoneycomb = android.os.Build.VERSION.SDK_INT >= 11;
-
-    File dbFile;
-
     SQLiteDatabase mydb;
 
     boolean isTransactionActive = false;
@@ -84,8 +82,26 @@ class SQLiteAndroidDatabase
      *
      * @param dbfile   The database File specification
      */
-    void open(File dbfile, String key) throws Exception {
-        mydb = SQLiteDatabase.openOrCreateDatabase(dbfile, key, null);
+    void open(final File dbfile, final String key) throws Exception {
+        SQLiteDatabaseHook compatibilityHook = new SQLiteDatabaseHook() {
+            @Override
+            public void preKey(SQLiteDatabase database) {
+                // Intentionally empty.
+                // android-database-sqlcipher will apply the key after this.
+            }
+
+            @Override
+            public void postKey(SQLiteDatabase database) {
+                if (key != null && !key.isEmpty()) {
+                    // SQLCipher 3.x compatibility settings.
+                    database.rawExecSQL("PRAGMA cipher_page_size = 1024;");
+                    database.rawExecSQL("PRAGMA kdf_iter = 64000;");
+                    database.rawExecSQL("PRAGMA cipher_hmac_algorithm = HMAC_SHA1;");
+                    database.rawExecSQL("PRAGMA cipher_kdf_algorithm = PBKDF2_HMAC_SHA1;");
+                }
+            }
+        };
+        mydb = SQLiteDatabase.openOrCreateDatabase(dbfile, key, null, compatibilityHook);
     }
 
     /**
@@ -129,7 +145,6 @@ class SQLiteAndroidDatabase
         cbc.success(batchResults);
     }
 
-    @SuppressLint("NewApi")
     private void executeSqlBatchStatement(String query, JSONArray json_params, JSONArray batchResults) {
 
         if (mydb == null) {
@@ -450,7 +465,7 @@ class SQLiteAndroidDatabase
                 // (needed for SQLCipher version)
                 if (first.length() == 0) throw new RuntimeException("query not found");
 
-                return QueryType.valueOf(first.toLowerCase());
+                return QueryType.valueOf(first.toLowerCase(Locale.ENGLISH));
             } catch (IllegalArgumentException ignore) {
                 // unknown verb (NOT blank)
                 return QueryType.other;
