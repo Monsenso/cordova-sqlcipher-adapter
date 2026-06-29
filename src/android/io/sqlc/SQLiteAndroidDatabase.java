@@ -7,21 +7,13 @@
 package io.sqlc;
 
 // SQLCipher version of database classes:
-import net.sqlcipher.*;
-import net.sqlcipher.database.*;
-// zetetic 4.x does not include these in net.sqlcipher.database, use Android standard:
-import android.database.sqlite.SQLiteConstraintException;
-import android.database.sqlite.SQLiteException;
-/* **
+import net.zetetic.database.sqlcipher.SQLiteConnection;
+import net.zetetic.database.sqlcipher.SQLiteDatabase;
+import net.zetetic.database.sqlcipher.SQLiteDatabaseHook;
+import net.zetetic.database.sqlcipher.SQLiteStatement;
 import android.database.Cursor;
-import android.database.CursorWindow;
-
 import android.database.sqlite.SQLiteConstraintException;
-import android.database.sqlite.SQLiteCursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.database.sqlite.SQLiteStatement;
-// */
 
 import android.util.Log;
 
@@ -73,7 +65,7 @@ class SQLiteAndroidDatabase
     //@Override
     static
     public void initialize(CordovaInterface cordova) {
-        SQLiteDatabase.loadLibs(cordova.getActivity());
+        System.loadLibrary("sqlcipher");
     }
 
     /**
@@ -85,23 +77,23 @@ class SQLiteAndroidDatabase
     void open(final File dbfile, final String key) throws Exception {
         SQLiteDatabaseHook compatibilityHook = new SQLiteDatabaseHook() {
             @Override
-            public void preKey(SQLiteDatabase database) {
+            public void preKey(SQLiteConnection connection) {
                 // Intentionally empty.
-                // android-database-sqlcipher will apply the key after this.
+                // sqlcipher-android will apply the key after this.
             }
 
             @Override
-            public void postKey(SQLiteDatabase database) {
+            public void postKey(SQLiteConnection connection) {
                 if (key != null && !key.isEmpty()) {
                     // SQLCipher 3.x compatibility settings.
-                    database.rawExecSQL("PRAGMA cipher_page_size = 1024;");
-                    database.rawExecSQL("PRAGMA kdf_iter = 64000;");
-                    database.rawExecSQL("PRAGMA cipher_hmac_algorithm = HMAC_SHA1;");
-                    database.rawExecSQL("PRAGMA cipher_kdf_algorithm = PBKDF2_HMAC_SHA1;");
+                    connection.execute("PRAGMA cipher_page_size = 1024;", null, null);
+                    connection.execute("PRAGMA kdf_iter = 64000;", null, null);
+                    connection.execute("PRAGMA cipher_hmac_algorithm = HMAC_SHA1;", null, null);
+                    connection.execute("PRAGMA cipher_kdf_algorithm = PBKDF2_HMAC_SHA1;", null, null);
                 }
             }
         };
-        mydb = SQLiteDatabase.openOrCreateDatabase(dbfile, key, null, compatibilityHook);
+        mydb = SQLiteDatabase.openOrCreateDatabase(dbfile.getAbsolutePath(), key, null, null, compatibilityHook);
     }
 
     /**

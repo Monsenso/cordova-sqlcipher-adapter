@@ -45,8 +45,8 @@
         <!-- SQLCipher 4.x runtime for Android.
             Existing SQLCipher 3.x databases are opened by applying the legacy
             SQLCipher 3 page size, KDF, HMAC, and KDF algorithm settings in postKey(). -->
-        <framework src="net.zetetic:android-database-sqlcipher:4.5.4" />
-        <framework src="androidx.sqlite:sqlite:2.2.0" />
+        <framework src="net.zetetic:sqlcipher-android:4.16.0" />
+        <framework src="androidx.sqlite:sqlite:2.6.2" />
     </platform>
 
     <!-- iOS -->
